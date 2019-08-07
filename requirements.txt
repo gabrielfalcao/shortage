@@ -56,8 +56,6 @@ pytzdata==2019.2
 PyYAML==5.1
 requests==2.22.0
 scramp==1.1.0
-# Editable Git install with no remote (shortage-app==0.1.0)
--e /Users/gabrielfalcao/projects/personal/shortage
 six==1.12.0
 snowballstemmer==1.9.0
 Sphinx==2.1.2

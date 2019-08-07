@@ -2,7 +2,7 @@ import re
 import logging
 import json
 from pathlib import Path
-
+from shortage.config import SMS_STORAGE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class FileStorage(object):
 
 
 def get_storage_path():
-    return Path('~/.shortage/data').expanduser()
+    return Path(SMS_STORAGE_PATH or '~/.shortage/data').expanduser().absolute()
 
 
 def default_storage():

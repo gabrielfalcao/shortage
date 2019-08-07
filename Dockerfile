@@ -7,20 +7,27 @@ RUN apt-get update \
 
 WORKDIR /srv/shortage
 
+RUN pip3 install -U setuptools pip
+
 ADD . /srv/shortage/
-
-RUN pip3 install -U setuptools, pip
 RUN pip3 install -r /srv/shortage/requirements.txt
-
 RUN python3 setup.py install
 
-ENV WORKERS 1
-
+VOLUME ["/srv/data"]
 ENV SHORTAGE_PORT 3000
+ENV SMS_STORAGE_PATH /srv/data
+
 EXPOSE 3000
 
 # remove credentials
 RUN rm -f /srv/shortage/Makefile
 RUN rm -rf /srv/shortage/.git
 
-CMD shortage web --host=0.0.0.0 --port=3000
+# CMD shortage web --host=0.0.0.0 --port=3000
+
+CMD uwsgi \
+        --ini /srv/shortage/uwsgi.conf \
+        --module "shortage.wsgi:server" \
+        --need-app \
+        --http-socket :"$SHORTAGE_PORT" \
+        --master

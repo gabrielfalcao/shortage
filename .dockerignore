@@ -1,5 +1,10 @@
-.git*
-/tests/
+/.env
+/.git*
+/.venv
 /docs/
-Makefile
-fig.yml
+/tests/
+/Makefile
+/poetry.lock
+/*/node_modules/*
+/node_modules/
+/frontend/
