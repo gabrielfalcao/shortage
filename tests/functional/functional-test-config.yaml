@@ -1,0 +1,173 @@
+logging:
+  directory: ./logs/tests/functional
+  level: DEBUG
+
+aws:
+  create_missing_config: no
+
+dao:
+  file_system:
+    storage_path: ./_persisted-states
+
+  s3:
+    bucket_name: my-test-bucket
+    namespace: acme-dao-prefix
+
+app:
+  SERVER_NAME: 'acme-shipping.local'
+  BASE_URL: 'http://acme-shipping.local'
+
+  SWAGGER_UI_DOC_EXPANSION: list
+  SWAGGER_UI_JSONEDITOR: yes
+  RESTPLUS_VALIDATE: yes
+
+  FORCE_SCHEMA_VALIDATION: no
+
+  TIMEZONE: 'America/New_York'
+  DATETIME_LOCALE: 'us'
+
+
+providers:
+  traditional:
+    ACME_2_DAY_EXPRESS:
+      service_level: 2_DAY
+      quote:
+        currency: USD
+        price: 15
+
+    ACME_5_DAY_NO_HURRY:
+      service_level: GROUND
+      quote:
+        currency: USD
+        price: 6.50
+
+  on-demand:
+    ACME_ON_DEMAND_2_HOURS:
+      service_level: SAME_DAY_DELIVERY
+      quote:
+        currency: USD
+        price: 10.00
+
+clockwork:
+  # here we can configure the time transformations that must happen in
+  # the configured responses
+  slots:
+    ACME_ON_DEMAND_2_HOURS:
+      repeat: 5
+      minute: 0  # reset minutes
+      second: 0  # and seconds so slots start and end in a full hour
+      delta:
+        hours: 2
+      cutoff:           # roll over to next day when calculating slots
+        threshold:
+          hour: 16      # last pickup time is 4PM
+          minute: 0
+          second: 0
+        adjust:
+          reset: yes
+          hour: 8
+          delta:
+            days: 1
+
+
+  adapter_shipping_offers:
+    delivery_estimate:
+      # defining the delivery_estimate transformations by
+      # "shipping_type"
+
+      ACME_2_DAY_EXPRESS:
+        window:
+          cutoff:  # shipments booked after this time will add an extra day
+            threshold:
+              hour: 15
+            adjust:       # when the time passes the threshold
+              reset: yes  # reset time
+              add:
+                days: 1
+
+        starts_at:
+          hour: 8  # starts delivering at 8AM
+          minute: 0
+          second: 0
+          add:
+            days: 2  # takes 2 days to deliver
+
+          exceptions:
+            # when a day is defined to "off" then a delta of +24 hours
+            # is applied
+            sunday: off
+
+        ends_at:
+          hour: 19  # ends delivery at 7PM
+          minute: 0
+          second: 0
+          add:
+            days: 2  # takes 2 days to deliver
+          exceptions:
+            saturday:  # except saturdays where
+              hour: 16  # delivery ends at 4PM
+              delta:
+                days: 2
+
+            # sundays are off, so shift +24 hours
+            sunday: off
+
+        expires_at:
+          add:
+            hours: 1
+
+      ACME_5_DAY_NO_HURRY:
+        window:
+          cutoff:  # shipments booked after this time will add an extra day
+            threshold:
+              hour: 17
+            adjust:       # when the time passes the threshold
+              reset: yes  # reset time
+              delta:      # then
+                days: 1   # move to next day
+
+        starts_at:
+          hour: 8
+          minute: 0
+          second: 0
+          delta:
+            days: 5
+          exceptions:
+            sunday: off
+
+        ends_at:
+          hour: 19
+          minute: 0
+          second: 0
+          delta:
+            days: 5
+          exceptions:
+            saturday:
+              hour: 16
+              delta:
+                days: 5
+            sunday: off
+
+        expires_at:
+          delta:
+            hours: 1
+
+      ACME_ON_DEMAND_2_HOURS:
+        starts_at:
+          exceptions:
+            saturday: off
+            sunday: off
+
+        ends_at:
+          delta:
+            hours: 2  # takes 2 hours to deliver
+          exceptions:
+            saturday: off
+            sunday: off
+
+        expires_at:
+          delta:
+            minutes: 5
+          exceptions:
+            saturday: off
+            sunday: off
