@@ -1,19 +1,6 @@
-# make sure that the toolbelt never runs against a shell environment
-# pre-configured with AWS stuff.
-# basically prevents unwanted side-effects against a real AWS account.
-unexport AWS_PROFILE
-unexport AWS_DEFAULT_PROFILE
-unexport AWS_DEFAULT_REGION
-unexport AWS_ACCESS_KEY_ID
-unexport AWS_SECRET_ACCESS_KEY
-unexport AWS_SESSION_TOKEN
-
-
 # prepare toolbelt to run in test-mode
 current_dir := $(shell pwd)
 export PYTHONDONTWRITEBYTECODE	:= yes
-export TWILIO_ACCOUNT_SID	?= "ACB3F027374DC9789C0E89F162850B3715"
-export TWILIO_AUTH_TOKEN	?= "5110beb37b3871593d41f5f0dba098f4"
 
 # NOTE: the first target of a makefile executed when ``make`` is
 # executed without arguments.
@@ -47,7 +34,7 @@ docker-image:
 	docker build -t gabrielfalcao/shortage .
 
 docker-run:
-	docker run -t -i -e TWILIO_AUTH_TOKEN="$(TWILIO_AUTH_TOKEN)" -e TWILIO_ACCOUNT_SID="$(TWILIO_ACCOUNT_SID)" gabrielfalcao/shortage
+	source .env && docker run -t -i -e TWILIO_AUTH_TOKEN="$(TWILIO_AUTH_TOKEN)" -e TWILIO_ACCOUNT_SID="$(TWILIO_ACCOUNT_SID)" gabrielfalcao/shortage
 
 tests:  # run unit and functional tests together aggregating total coverage
 	poetry run nosetests tests --cover-erase

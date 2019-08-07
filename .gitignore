@@ -63,3 +63,4 @@ tests/.generated/
 # VSCode
 /.vscode
 nohup.out
+.env
