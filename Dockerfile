@@ -10,7 +10,6 @@ WORKDIR /srv/shortage
 RUN pip3 install -U setuptools pip
 
 ADD . /srv/shortage/
-RUN pip3 install -r /srv/shortage/requirements.txt
 RUN python3 setup.py install
 
 VOLUME ["/srv/data"]
@@ -21,6 +20,7 @@ EXPOSE 3000
 
 # remove credentials
 RUN rm -f /srv/shortage/Makefile
+RUN rm -f /srv/shortage/.env
 RUN rm -rf /srv/shortage/.git
 
 # CMD shortage web --host=0.0.0.0 --port=3000

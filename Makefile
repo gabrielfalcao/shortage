@@ -34,7 +34,7 @@ docker-image:
 	docker build -t gabrielfalcao/shortage .
 
 docker-run:
-	source .env && docker run -t -i -e TWILIO_AUTH_TOKEN="$(TWILIO_AUTH_TOKEN)" -e TWILIO_ACCOUNT_SID="$(TWILIO_ACCOUNT_SID)" gabrielfalcao/shortage
+	source .env && docker run -t -i -v $HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN="$(TWILIO_AUTH_TOKEN)" -e TWILIO_ACCOUNT_SID="$(TWILIO_ACCOUNT_SID)" gabrielfalcao/shortage
 
 tests:  # run unit and functional tests together aggregating total coverage
 	poetry run nosetests tests --cover-erase
