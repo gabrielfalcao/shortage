@@ -1,5 +1,9 @@
 import time
-import pync
+try:
+    import pync
+except ImportError:
+    pync = None
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -53,17 +57,27 @@ def default_sms_handling():
     return Response(str(resp), headers={'Content-Type': 'application/xml'})
 
 
+def show_notification(body, title):
+    if not pync:
+        logger.warning('{title} - {body}')
+        return
+
+    try:
+        pync.notify(body, title=title)
+    except Exception as err:
+        logger.debug(
+            f'failed to show notification "{body}" (title={title}) - {err}'
+        )
+
+
 def store_sms_request() -> Path:
     storage = default_storage()
     logger.debug(f'storing SMS request')
     timestamp = str(time.time())
     raw = serialized_flask_request()
     message = MessageData(raw['data'])
-    try:
-        pync.notify(message.Body, title=f'{message.To} SMS')
-    except Exception as err:
-        logger.debug(f'failed to show notification {err}')
 
+    show_notification(message.Body, title=f'{message.To} SMS')
     key = message.To or 'webhook'
     return storage.add(key, timestamp, raw)
 

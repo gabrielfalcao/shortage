@@ -1,6 +1,7 @@
 # prepare toolbelt to run in test-mode
 current_dir := $(shell pwd)
 export PYTHONDONTWRITEBYTECODE	:= yes
+DOCKER_RUN	:= source .env && docker run -t -i -v $$HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN -e TWILIO_ACCOUNT_SID gabrielfalcao/shortage
 
 # NOTE: the first target of a makefile executed when ``make`` is
 # executed without arguments.
@@ -34,7 +35,10 @@ docker-image:
 	docker build -t gabrielfalcao/shortage .
 
 docker-run:
-	source .env && docker run -t -i -v $HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN="$(TWILIO_AUTH_TOKEN)" -e TWILIO_ACCOUNT_SID="$(TWILIO_ACCOUNT_SID)" gabrielfalcao/shortage
+	$(DOCKER_RUN)
+
+docker-shell:
+	$(DOCKER_RUN) bash
 
 tests:  # run unit and functional tests together aggregating total coverage
 	poetry run nosetests tests --cover-erase
