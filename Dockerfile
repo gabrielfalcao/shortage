@@ -1,9 +1,12 @@
-FROM python:3.7-buster
+FROM python:3.7-alpine
 
-RUN apt-get update \
-  && apt-get --yes --no-install-recommends install \
-    python3-dev python3-pip uwsgi libffi-dev libzmq5-dev \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --update \
+    python3-dev \
+    uwsgi \
+    build-base \
+    libffi-dev \
+  && pip install virtualenv \
+  && rm -rf /var/cache/apk/*
 
 WORKDIR /srv/shortage
 
