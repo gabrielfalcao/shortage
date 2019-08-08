@@ -34,6 +34,9 @@ develop: # install all development dependencies with poetry
 docker-image:
 	docker build -t gabrielfalcao/shortage .
 
+docker-push:
+	docker push gabrielfalcao/shortage
+
 docker-run:
 	$(DOCKER_RUN)
 

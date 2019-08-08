@@ -1,7 +1,7 @@
 import time
 try:
     import pync
-except ImportError:
+except:  # noqa
     pync = None
 
 import logging

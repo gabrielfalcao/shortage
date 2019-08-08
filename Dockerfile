@@ -23,11 +23,4 @@ RUN rm -f /srv/shortage/Makefile
 RUN rm -f /srv/shortage/.env
 RUN rm -rf /srv/shortage/.git
 
-# CMD shortage web --host=0.0.0.0 --port=3000
-
-CMD uwsgi \
-        --ini /srv/shortage/uwsgi.conf \
-        --module "shortage.wsgi:server" \
-        --need-app \
-        --http-socket :"$SHORTAGE_PORT" \
-        --master
+CMD shortage web --host=0.0.0.0 --port=3000
