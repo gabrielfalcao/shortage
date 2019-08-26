@@ -3,6 +3,7 @@ current_dir := $(shell pwd)
 export PYTHONDONTWRITEBYTECODE	:= yes
 DOCKER_RUN	:= source .env && docker run -t -i -v $$HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN -e TWILIO_ACCOUNT_SID gabrielfalcao/shortage
 POETRY_RUN	:= source .env && poetry run
+HTTP_REQUEST	:= curl -v -X POST -H "Content-Type: application/json" -d @.request.json
 # NOTE: the first target of a makefile executed when ``make`` is
 # executed without arguments.
 # It was deliberately named "default" here but could be any name.
@@ -30,6 +31,8 @@ black: # format all python code with black
 develop: # install all development dependencies with poetry
 	poetry install
 	$(POETRY_RUN) python setup.py develop
+
+docker: docker-image docker-push
 
 docker-image:
 	time docker build -t gabrielfalcao/shortage .
@@ -71,10 +74,15 @@ run-debug:
 	$(POETRY_RUN) shortage web --debug
 
 local-request:
-	curl -X POST -H "Content-Type: application/json" -d @.request.json http://localhost:3000/sms/in
+	$(HTTP_REQUEST) http://localhost:3000/sms/in
+	@echo
 
-remote:
-	curl -X POST -H "Content-Type: application/json" -d @.request.json https://sms.falcao.it/sms/in
+request:
+	$(HTTP_REQUEST) https://sms.falcao.it/sms/in
+	@echo
+
+remote-request: request
+
 
 docs-html: # (re) generates documentation
 	$(POETRY_RUN) make -C docs html

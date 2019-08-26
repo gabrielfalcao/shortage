@@ -10,7 +10,7 @@ from flask_restplus import Resource, Api  # noqa
 from twilio.twiml.messaging_response import MessagingResponse
 
 from shortage.filesystem import default_storage
-from shortage.networking.pushover import PushOverClient
+from shortage.networking import PushOverClient
 
 
 class Application(Flask):
@@ -22,7 +22,7 @@ class Application(Flask):
     def pushover(self):
         token = self.config.get('PUSHOVER_API_TOKEN')
         user_key = self.config.get('PUSHOVER_API_USER_KEY')
-        return PushOverClient(token, user_key)
+        return PushOverClient(token=token, user_key=user_key)
 
 
 app = Application()

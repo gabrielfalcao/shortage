@@ -3,19 +3,18 @@ FROM python:3.7-alpine
 RUN apk add --update \
     python3-dev \
     py3-yaml \
-    ncurses-bin \
+    ncurses \
     uwsgi \
     build-base \
     openssl-dev \
     bash \
     libffi-dev \
     yaml-dev \
-  && pip install poetry virtualenv \
+  && pip3 install -U pip setuptools \
+  && pip3 install poetry virtualenv \
   && rm -rf /var/cache/apk/*
 
 WORKDIR /srv/shortage
-
-RUN pip3 install -U setuptools pip
 
 ADD . /srv/shortage/
 RUN python3 setup.py install
