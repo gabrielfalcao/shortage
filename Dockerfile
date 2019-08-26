@@ -3,6 +3,7 @@ FROM python:3.7-alpine
 RUN apk add --update \
     python3-dev \
     py3-yaml \
+    ncurses-bin \
     uwsgi \
     build-base \
     openssl-dev \
