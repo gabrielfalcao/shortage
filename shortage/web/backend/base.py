@@ -51,6 +51,9 @@ def serialized_flask_request():
         data["url"] = url
 
     data["data"] = {}
+    data["form"] = request.form
+    data["args"] = request.args
+    data["values"] = request.values
     data["headers"] = dict(request.headers)
 
     raw = request.data
