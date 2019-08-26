@@ -1,4 +1,5 @@
 import time
+import json
 import logging
 from collections import OrderedDict
 from functools import wraps
@@ -52,8 +53,20 @@ def serialized_flask_request():
     data["data"] = {}
     data["headers"] = dict(request.headers)
 
-    if request.data:
-        data["data"] = request.data
+    raw = request.data
+    if isinstance(raw, bytes):
+        try:
+            data["data"] = json.loads(str(request.data.decode('utf-8')))
+        except Exception as e:
+            data["data"] = {'raw': raw}
+            logger.warning(f'failed to parse json from bytes: {raw!r}: {e}')
+    elif isinstance(request.data, str):
+        try:
+            data["data"] = request.json()
+        except Exception as e:
+            logger.warning(f'failed to parse json from string: {raw!r}: {e}')
+            data["data"] = {'raw': raw}
+
     elif request.values:
         data["data"] = dict(request.values)
     elif request.form:

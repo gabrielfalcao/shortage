@@ -70,6 +70,9 @@ run:
 run-debug:
 	poetry run shortage web --debug
 
+request:
+	curl -X POST -H "Content-Type: application/json" -d @.request.json http://localhost:3000/sms/in
+
 docs-html: # (re) generates documentation
 	poetry run make -C docs html
 
