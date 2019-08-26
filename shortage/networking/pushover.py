@@ -1,6 +1,10 @@
-import requests
-from urllib.parse import urljoin
+# -*- coding: utf-8 -*-
+import json
 import logging
+import requests
+
+from urllib.parse import urljoin
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +26,21 @@ class PushOverClient(object):
         self.base_url = f"https://api.pushover.net/"
 
         self.http = requests.Session()
+        self.http.headers.update({
+            'Content-Type': 'application/json'
+        })
 
     def url(self, path):
         return urljoin(self.base_url, path)
 
     def send_notification(self, body: str, title: str):
-        data = {
+        data = json.dumps({
             "token": self.token,
             "user": self.user_key,
             "message": body,
             "title": title,
-        }
-        url = self.url("/1/message.json")
+        })
+        url = self.url("/1/messages.json")
         try:
             response = self.http.post(url, data=data)
         except Exception as e:

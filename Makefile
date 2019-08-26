@@ -2,7 +2,7 @@
 current_dir := $(shell pwd)
 export PYTHONDONTWRITEBYTECODE	:= yes
 DOCKER_RUN	:= source .env && docker run -t -i -v $$HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN -e TWILIO_ACCOUNT_SID gabrielfalcao/shortage
-
+POETRY_RUN	:= source .env && poetry run
 # NOTE: the first target of a makefile executed when ``make`` is
 # executed without arguments.
 # It was deliberately named "default" here but could be any name.
@@ -22,14 +22,14 @@ dependencies: # install and configure poetry, create new virtualenv and install 
 	make develop
 
 lint: # run flake8
-	poetry run flake8 --ignore=E501 shortage tests docs/source/conf.py
+	$(POETRY_RUN) flake8 --ignore=E501 shortage tests docs/source/conf.py
 
 black: # format all python code with black
-	poetry run black --line-length 79 shortage tests
+	$(POETRY_RUN) black --line-length 79 shortage tests
 
 develop: # install all development dependencies with poetry
 	poetry install
-	poetry run python setup.py develop
+	$(POETRY_RUN) python setup.py develop
 
 docker-image:
 	time docker build -t gabrielfalcao/shortage .
@@ -44,40 +44,40 @@ docker-shell:
 	$(DOCKER_RUN) bash
 
 tests:  # run unit and functional tests together aggregating total coverage
-	poetry run nosetests tests --cover-erase
+	$(POETRY_RUN) nosetests tests --cover-erase
 
 tests-with-timer:  # run all tests with time tracking (nice for seeing slow ones)
-	poetry run nosetests tests --cover-erase --with-timer
+	$(POETRY_RUN) nosetests tests --cover-erase --with-timer
 
 unit:   # run unit tests, erases coverage file
-	poetry run nosetests tests/$@ --cover-erase # let's clear the test coverage report during unit tests only
+	$(POETRY_RUN) nosetests tests/$@ --cover-erase # let's clear the test coverage report during unit tests only
 
 functional: # run functional tests
-	poetry run nosetests tests/$@
+	$(POETRY_RUN) nosetests tests/$@
 
 tdd-unit:  # run unit tests in watch mode
-	poetry run nosetests --with-watch tests/unit
+	$(POETRY_RUN) nosetests --with-watch tests/unit
 
 tdd-functional:  # run functional tests in watch mode
-	poetry run nosetests --with-watch tests/functional/
+	$(POETRY_RUN) nosetests --with-watch tests/functional/
 
 tdd:  # run all tests in watch mode (nice for top-down tdd)
-	poetry run nosetests --with-watch tests/
+	$(POETRY_RUN) nosetests --with-watch tests/
 
 run:
-	poetry run shortage web
+	$(POETRY_RUN) shortage web
 
 run-debug:
-	poetry run shortage web --debug
+	$(POETRY_RUN) shortage web --debug
 
-request-local:
+local-request:
 	curl -X POST -H "Content-Type: application/json" -d @.request.json http://localhost:3000/sms/in
 
-request-remote:
+remote:
 	curl -X POST -H "Content-Type: application/json" -d @.request.json https://sms.falcao.it/sms/in
 
 docs-html: # (re) generates documentation
-	poetry run make -C docs html
+	$(POETRY_RUN) make -C docs html
 
 docs: docs-html  # (re) generates documentation and open in browser
 	open docs/build/html/index.html
