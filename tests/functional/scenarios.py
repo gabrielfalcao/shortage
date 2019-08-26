@@ -24,8 +24,10 @@ from tests.functional.httpdomain_client import apidoc_description  # noqa
 
 datetime = DateEngine()
 
-dao_path = Path(__file__).parent.joinpath('_state')
-documentation_path = Path(acme_shipment_provider.__file__).parent.parent.joinpath('docs/source/tested-endpoints')
+dao_path = Path(__file__).parent.joinpath("_state")
+documentation_path = Path(
+    acme_shipment_provider.__file__
+).parent.parent.joinpath("docs/source/tested-endpoints")
 
 
 class Synthesize(object):
@@ -38,10 +40,20 @@ class Synthesize(object):
     def external_order_id(cls):
         """:returns: a string with a fake order number for Giovana Dodici (GD)
         """
-        return 'GD{}'.format("".join([str(random.randint(0, 9)) for _ in range(9)]))
+        return "GD{}".format(
+            "".join([str(random.randint(0, 9)) for _ in range(9)])
+        )
 
     @classmethod
-    def package(cls, width=100, height=100, depth=100, length_unit='cm', weight=2.5, weight_unit='kb'):
+    def package(
+        cls,
+        width=100,
+        height=100,
+        depth=100,
+        length_unit="cm",
+        weight=2.5,
+        weight_unit="kb",
+    ):
         """
         :returns: a dict with packaging information (dimensions and weight)
         """
@@ -52,10 +64,7 @@ class Synthesize(object):
                 "depth": depth,
                 "unit": length_unit,
             },
-            "weight": {
-                "amount": weight,
-                "unit": weight_unit,
-            }
+            "weight": {"amount": weight, "unit": weight_unit},
         }
         return result
 
@@ -74,9 +83,10 @@ class Synthesize(object):
         :returns: a dict with sender_address, shipping_address and ready_by
         """
         request_data = {
-            "sender_address": cls.adapter_address(country_code='US'),
-            "shipping_address": cls.adapter_address(country_code='US'),
-            "ready_by": ready_by or DateEngine.prettify(datetime.now() + timedelta(days=1)),
+            "sender_address": cls.adapter_address(country_code="US"),
+            "shipping_address": cls.adapter_address(country_code="US"),
+            "ready_by": ready_by
+            or DateEngine.prettify(datetime.now() + timedelta(days=1)),
         }
         request_data.update(kw)
         return request_data
@@ -93,40 +103,26 @@ class Synthesize(object):
         :returns: a dict with request data for booking a shipment
         """
         request_data = {
-            "offer": kw.pop('offer', None),
+            "offer": kw.pop("offer", None),
             "rate": rate,
             "carrier_code": "ACME",
             "external_order_id": "some offer id",
             "booking_method": "only_shipping",
-            "sender_address": cls.adapter_address(country_code='US'),
-            "shipping_address": cls.adapter_address(country_code='US'),
-            "tenant": 'dodici',
-            "envchar": 'x',
+            "sender_address": cls.adapter_address(country_code="US"),
+            "shipping_address": cls.adapter_address(country_code="US"),
+            "tenant": "dodici",
+            "envchar": "x",
             "items": [
                 {
-                    "price": {
-                        "currency": "USD",
-                        "amount": 42,
-                    },
-                    "identifier": {
-                        "EAN": "978020137962"
-                    }
+                    "price": {"currency": "USD", "amount": 42},
+                    "identifier": {"EAN": "978020137962"},
                 },
                 {
-                    "weight": {
-                        "amount": 750,
-                        "unit": "g"
-                    },
-                    "identifier": {
-                        "SKU": "dc12456"
-                    },
-                    "dimensions": {
-                        "unit": "cm",
-                        "width": 200,
-                        "length": 200
-                    }
-                }
-            ]
+                    "weight": {"amount": 750, "unit": "g"},
+                    "identifier": {"SKU": "dc12456"},
+                    "dimensions": {"unit": "cm", "width": 200, "length": 200},
+                },
+            ],
         }
         request_data.update(kw)
         return request_data
@@ -142,62 +138,69 @@ class FixtureFactory(object):
     """Data factory that writes directly in the DAO, useful to test API
     endpoints that retrieve or modify existing data.
     """
+
     def __init__(self, context):
         self.context = context
 
-    def many_shipping_offers(self, provider_name='traditional', **kw):
+    def many_shipping_offers(self, provider_name="traditional", **kw):
         """
         :returns: a list of offer data from the data-storage layer
         """
         with self.context.application.test_request_context():
             return self.context.controller(OffersController).generate_offers(
-                provider_name,
-                Synthesize.adapter_request(**kw),
+                provider_name, Synthesize.adapter_request(**kw)
             )
 
     def one_shipping_offer(self, **kw):
         """shortcut to ``many_shipping_offers()`` but returns only the first offer
         """
         if not kw:
-            kw['provider_rate'] = 'ACME_2_DAY_EXPRESS'
+            kw["provider_rate"] = "ACME_2_DAY_EXPRESS"
 
         offers = self.many_shipping_offers(**kw)
         if not offers:
-            msg = 'could not create offers with given params: {}'
+            msg = "could not create offers with given params: {}"
             raise AssertionError(msg.format(kw))
 
-        return offers[0]['offer']
+        return offers[0]["offer"]
 
-    def shipment(self, force_status=None, only_tracking_code=True, provider_name='traditional', tenant='dodici', envchar='x', **request_data):
+    def shipment(
+        self,
+        force_status=None,
+        only_tracking_code=True,
+        provider_name="traditional",
+        tenant="dodici",
+        envchar="x",
+        **request_data
+    ):
         """
         :returns: shipment data from the data-storage layer
         """
-        request_data['tenant'] = tenant
-        request_data['envchar'] = envchar
-        if not request_data.get('offer'):
-            request_data['offer'] = self.one_shipping_offer()
+        request_data["tenant"] = tenant
+        request_data["envchar"] = envchar
+        if not request_data.get("offer"):
+            request_data["offer"] = self.one_shipping_offer()
 
-        if not request_data.get('external_order_id'):
-            request_data['external_order_id'] = Synthesize.external_order_id()
+        if not request_data.get("external_order_id"):
+            request_data["external_order_id"] = Synthesize.external_order_id()
 
-        if not request_data.get('booking_method'):
-            request_data['booking_method'] = 'shipping_and_return'
+        if not request_data.get("booking_method"):
+            request_data["booking_method"] = "shipping_and_return"
 
         with self.context.application.test_request_context():
-            shipment = self.context.controller(ShipmentController).book_shipment(
-                provider_name,
-                request_data
-            )
+            shipment = self.context.controller(
+                ShipmentController
+            ).book_shipment(provider_name, request_data)
             if force_status and isinstance(force_status, (bytes, str)):
-                shipment['status'] = force_status
-                shipment = shipment.save(key='tracking_code')
+                shipment["status"] = force_status
+                shipment = shipment.save(key="tracking_code")
 
         if not shipment:
-            msg = 'could not book shipment with given params: {}'
+            msg = "could not book shipment with given params: {}"
             raise AssertionError(msg.format(request_data))
 
         if only_tracking_code:
-            return shipment['tracking_code']
+            return shipment["tracking_code"]
 
         return dict(shipment)
 
@@ -215,10 +218,10 @@ def relative_path(path):
     return str(path.absolute().relative_to(dao_path))
 
 
-def file_tree(path, pattern='**/*'):
+def file_tree(path, pattern="**/*"):
     """returns a list of all (sub)children in a file-system directory
     """
-    return list(sorted(map(relative_path, path.glob('**/*'))))
+    return list(sorted(map(relative_path, path.glob("**/*"))))
 
 
 def s3_tree():
@@ -237,8 +240,7 @@ def prepare_app_client(context):
     httpretty.reset()
     context.application = application
     context.http = HttpDomainFlaskClient.from_app(
-        application,
-        documentation_path=documentation_path
+        application, documentation_path=documentation_path
     )
     context.dao = application.dao
     context.controller = create_controller
@@ -276,7 +278,9 @@ def prepare_s3_dao(context):
     context.dao = S3Storage()
     # create bucket
     response = context.dao.bucket.create()
-    assert response['ResponseMetadata']['HTTPStatusCode'] == 200, 'failed to create bucket for s3 dao'
+    assert (
+        response["ResponseMetadata"]["HTTPStatusCode"] == 200
+    ), "failed to create bucket for s3 dao"
 
 
 def cleanup_s3_dao(context):
@@ -293,4 +297,6 @@ def ensure_test_aws_credentials(context):
 
 with_file_dao = scenario([prepare_file_dao])
 
-with_s3_dao = scenario([ensure_test_aws_credentials, prepare_s3_dao], [cleanup_s3_dao])
+with_s3_dao = scenario(
+    [ensure_test_aws_credentials, prepare_s3_dao], [cleanup_s3_dao]
+)

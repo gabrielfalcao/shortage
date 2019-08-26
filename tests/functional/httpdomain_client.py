@@ -15,6 +15,7 @@ from flask.testing import FlaskClient
 def apidoc_title(title):
     """Decorator to define an explicit title for the generated endpoint documentation.
     """
+
     def dec(func):
         func.__title__ = title
         return func
@@ -25,6 +26,7 @@ def apidoc_title(title):
 def apidoc_description(description):
     """Decorator to define an explicit description body for the generated endpoint documentation.
     """
+
     def dec(func):
         func.__description__ = description
         return func
@@ -45,7 +47,7 @@ def try_json(body, indent=2):
 
     """
     if isinstance(body, bytes):
-        body = body.decode('utf-8')
+        body = body.decode("utf-8")
 
     try:
         json_body = json.loads(body)
@@ -58,17 +60,24 @@ def try_json(body, indent=2):
 def pretty_header_name(name):
     """Normalize headers from ``header-name`` to ``Header-Name``
     """
-    return str('-'.join([s.capitalize() for s in name.split('_')]))
+    return str("-".join([s.capitalize() for s in name.split("_")]))
 
 
 def headers_to_rst(headers):
-    return str('\n'.join([
-        "{}: {}".format(pretty_header_name(k), v) for k, v in headers.items()
-    ]))
+    return str(
+        "\n".join(
+            [
+                "{}: {}".format(pretty_header_name(k), v)
+                for k, v in headers.items()
+            ]
+        )
+    )
 
 
 def extract_test_case_frame_from_stack():
-    candidates = [s for s in traceback.extract_stack() if s.name.startswith('test_')]
+    candidates = [
+        s for s in traceback.extract_stack() if s.name.startswith("test_")
+    ]
     test_case_frame = candidates[0]
     return test_case_frame
 
@@ -85,12 +94,12 @@ def extract_current_test_case_from_stack():
 
 def extract_description_from_current_test_case():
     test_case = extract_current_test_case_from_stack()
-    return getattr(test_case, '__description__', test_case.__doc__)
+    return getattr(test_case, "__description__", test_case.__doc__)
 
 
 def extract_title_from_current_test_case():
     test_case = extract_current_test_case_from_stack()
-    return getattr(test_case, '__title__', test_case.__doc__)
+    return getattr(test_case, "__title__", test_case.__doc__)
 
 
 def extract_name_of_current_test_case():
@@ -102,42 +111,48 @@ def response_to_dict(response):
     body = response.data
 
     result = {
-        'headers': headers_to_rst(response.headers),
-        'body': try_json(body),
-        'status': response.status,
-        'status_code': response.status_code,
+        "headers": headers_to_rst(response.headers),
+        "body": try_json(body),
+        "status": response.status,
+        "status_code": response.status_code,
     }
     return result
 
 
 def environ_to_request(environ, body=None):
     request = dict(
-        host=environ.get('HTTP_HOST'),
-        path=environ.get('PATH_INFO'),
-        method=environ.get('REQUEST_METHOD'),
-        port=environ.get('SERVER_PORT', 80),
-        http_version=environ.get('SERVER_PROTOCOL'),
+        host=environ.get("HTTP_HOST"),
+        path=environ.get("PATH_INFO"),
+        method=environ.get("REQUEST_METHOD"),
+        port=environ.get("SERVER_PORT", 80),
+        http_version=environ.get("SERVER_PROTOCOL"),
         headers={},
     )
-    headers = dict([(k.replace('HTTP_', '', 1), v) for k, v in environ.items() if k.startswith('HTTP_')])
-    fd = environ.pop('wsgi.input')
+    headers = dict(
+        [
+            (k.replace("HTTP_", "", 1), v)
+            for k, v in environ.items()
+            if k.startswith("HTTP_")
+        ]
+    )
+    fd = environ.pop("wsgi.input")
     body = try_json(body or fd.read())
 
-    request['headers'] = headers_to_rst(headers)
-    request['body'] = body
+    request["headers"] = headers_to_rst(headers)
+    request["body"] = body
     return request
 
 
 class HttpDomainFlaskClient(FlaskClient):
     def __init__(self, *args, **kw):
-        self.documentation_path = kw.pop('documentation_path')
+        self.documentation_path = kw.pop("documentation_path")
         super(HttpDomainFlaskClient, self).__init__(*args, **kw)
 
     def should_generate_docs(self):
-        return bool(os.getenv('ACME_GENERATE_DOCS'))
+        return bool(os.getenv("ACME_GENERATE_DOCS"))
 
     def url_to_filename(self, url):
-        return "{}.rst".format(re.sub(r'\W+', '-', url).strip('-'))
+        return "{}.rst".format(re.sub(r"\W+", "-", url).strip("-"))
 
     def url_to_path(self, url):
         filename = self.url_to_filename(url)
@@ -148,13 +163,15 @@ class HttpDomainFlaskClient(FlaskClient):
         return target.joinpath(filename)
 
     def open(self, *args, **kw):
-        as_tuple = kw.get('as_tuple', False)
-        kw['as_tuple'] = True
+        as_tuple = kw.get("as_tuple", False)
+        kw["as_tuple"] = True
 
-        body = kw.get('data')
-        environ, response = super(HttpDomainFlaskClient, self).open(*args, **kw)
+        body = kw.get("data")
+        environ, response = super(HttpDomainFlaskClient, self).open(
+            *args, **kw
+        )
 
-        if response.headers.get('Content-Type') != 'application/json':
+        if response.headers.get("Content-Type") != "application/json":
             return response
 
         if self.should_generate_docs():
@@ -172,27 +189,35 @@ class HttpDomainFlaskClient(FlaskClient):
         description = extract_description_from_current_test_case()
 
         context = {
-            'test_name': test_name,
-            'request': request,
-            'response': response_to_dict(response),
-            'title': "\n".join([title, '-' * len(title.strip())]),
-            'description': description,
+            "test_name": test_name,
+            "request": request,
+            "response": response_to_dict(response),
+            "title": "\n".join([title, "-" * len(title.strip())]),
+            "description": description,
         }
 
         return ENDPOINT_TEMPLATE.render(**context).strip()
 
     def persist_documentation(self, environ, body, response):
-        documentation = self.generate_endpoint_documentation(environ, body, response)
+        documentation = self.generate_endpoint_documentation(
+            environ, body, response
+        )
         frame = extract_test_case_frame_from_stack()
         path = self.url_to_path(frame.name)
         return path.write_text(documentation)
 
     @classmethod
     def from_app(cls, app, documentation_path, **kwargs):
-        return cls(app, app.response_class, documentation_path=documentation_path, **kwargs)
+        return cls(
+            app,
+            app.response_class,
+            documentation_path=documentation_path,
+            **kwargs
+        )
 
 
-ENDPOINT_TEMPLATE = Template('''
+ENDPOINT_TEMPLATE = Template(
+    """
 {% if title %}{{ title }}{% endif %}
 
 .. _{{ test_name }}:
@@ -220,4 +245,5 @@ ENDPOINT_TEMPLATE = Template('''
       {{ response.headers|indent(6) }}
 
       {{ response.body|indent(6) }}
-''')
+"""
+)

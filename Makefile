@@ -25,14 +25,14 @@ lint: # run flake8
 	poetry run flake8 --ignore=E501 shortage tests docs/source/conf.py
 
 black: # format all python code with black
-	poetry run black --line-length 79 shortage tests docs/source/conf.py
+	poetry run black --line-length 79 shortage tests
 
 develop: # install all development dependencies with poetry
 	poetry install
 	poetry run python setup.py develop
 
 docker-image:
-	docker build -t gabrielfalcao/shortage .
+	time docker build -t gabrielfalcao/shortage .
 
 docker-push:
 	docker push gabrielfalcao/shortage

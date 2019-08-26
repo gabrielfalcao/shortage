@@ -2,10 +2,14 @@ FROM python:3.7-alpine
 
 RUN apk add --update \
     python3-dev \
+    py3-yaml \
     uwsgi \
     build-base \
+    openssl-dev \
+    bash \
     libffi-dev \
-  && pip install virtualenv \
+    yaml-dev \
+  && pip install poetry virtualenv \
   && rm -rf /var/cache/apk/*
 
 WORKDIR /srv/shortage
@@ -25,5 +29,7 @@ EXPOSE 3000
 RUN rm -f /srv/shortage/Makefile
 RUN rm -f /srv/shortage/.env
 RUN rm -rf /srv/shortage/.git
+
+RUN echo 'export PS1="\033[1;34m\w\\033[1;33m \$\033[0m \[$(tput sgr0)\]"' >> $HOME/.bashrc
 
 CMD shortage web --host=0.0.0.0 --port=3000

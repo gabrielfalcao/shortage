@@ -58,12 +58,12 @@ install_requires = [
     "requests>=2.22",
     "authlib>=0.11.0",
     "chemist>=1.5",
+    # "python-pushover==0.4",
     "twilio>=6.29",
     "flask-restplus>=0.12.1",
     "pendulum>=2.0",
     "click>=7.0",
     "coloredlogs>=10.0",
-    "pip>=19.2",
     "pync>=2.0",
 ]
 
