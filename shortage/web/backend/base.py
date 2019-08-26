@@ -22,6 +22,8 @@ class Application(Flask):
     def pushover(self):
         token = self.config.get('PUSHOVER_API_TOKEN')
         user_key = self.config.get('PUSHOVER_API_USER_KEY')
+        config = json.dumps(dict(self.config.items()), indent=4, default=str)
+        logger.info(f'CONFIG: {config}')
         return PushOverClient(token=token, user_key=user_key)
 
 

@@ -29,8 +29,9 @@ class PushOverClient(object):
             "user": self.user_key,
             "message": body,
             "title": title,
-        })
+        }, indent=2)
         url = self.url("/1/messages.json")
+        logger.info(f"Calling pushover API\nPOST {url!r}\n{data}")
         try:
             response = self.http.post(url, data=data)
         except Exception as e:
