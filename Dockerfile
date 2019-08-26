@@ -32,4 +32,6 @@ RUN rm -rf /srv/shortage/.git
 
 RUN echo 'export PS1="\033[1;34m\w\\033[1;33m \$\033[0m \[$(tput sgr0)\]"' >> $HOME/.bashrc
 
+ENV SHORTAGE_VERSION 2
+
 CMD shortage web --host=0.0.0.0 --port=3000
