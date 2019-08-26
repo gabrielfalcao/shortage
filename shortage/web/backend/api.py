@@ -66,7 +66,7 @@ def default_sms_handling():
 def show_notification(body, title):
     app.pushover.send_notification(body, title)
     if not pync:
-        logger.warning("{title} - {body}")
+        logger.info(f"{title} - {body}")
         return
 
     try:

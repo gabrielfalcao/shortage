@@ -19,7 +19,7 @@ class PushOverClient(object):
     def __init__(self, token: str, user_key: str):
         self.token = token
         self.user_key = user_key
-        self.base_url = f"https://api.pushover.net/1"
+        self.base_url = f"https://api.pushover.net/"
 
         self.http = requests.Session()
 
@@ -33,8 +33,12 @@ class PushOverClient(object):
             "message": body,
             "title": title,
         }
-        url = self.url("message.json")
+        url = self.url("/1/message.json")
         try:
-            return self.http.post(url, data=data)
+            response = self.http.post(url, data=data)
         except Exception as e:
             logger.exception(f"failed to POST to {url!r}: {e}")
+            return
+
+        logger.info(f"POST {url!r}: {response}")
+        logger.info(f"response: {response.text}")
