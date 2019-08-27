@@ -48,6 +48,9 @@ class FileStorage(object):
 
     def add(self, key_name, key_value, data):
         blob_path = self.path_to_blob(key_name, key_value)
+        if isinstance(data, bytes):
+            data = data.decode("utf-8")
+
         blob = json.dumps(data, indent=2)
         with blob_path.open("w") as fd:
             fd.write(blob)
