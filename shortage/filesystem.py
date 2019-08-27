@@ -51,7 +51,7 @@ class FileStorage(object):
         if isinstance(data, bytes):
             data = data.decode("utf-8")
 
-        blob = json.dumps(data, indent=2)
+        blob = json.dumps(data, indent=2, default=str)
         with blob_path.open("w") as fd:
             fd.write(blob)
 
