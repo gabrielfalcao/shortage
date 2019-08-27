@@ -3,7 +3,7 @@ current_dir := $(shell pwd)
 export PYTHONDONTWRITEBYTECODE	:= yes
 DOCKER_RUN	:= source .env && docker run -t -i -v $$HOME/.shortage/data:/srv/data -e TWILIO_AUTH_TOKEN -e TWILIO_ACCOUNT_SID gabrielfalcao/shortage
 POETRY_RUN	:= source .env && poetry run
-HTTP_REQUEST	:= curl -v -X POST -H "Content-Type: application/json" -d @.request.json
+HTTP_REQUEST	:= curl --fail -v -X POST -H "Content-Type: application/json" -d @.request.json
 # NOTE: the first target of a makefile executed when ``make`` is
 # executed without arguments.
 # It was deliberately named "default" here but could be any name.
