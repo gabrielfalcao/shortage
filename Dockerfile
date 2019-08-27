@@ -10,7 +10,7 @@ RUN apk add --update \
     bash \
     libffi-dev \
     yaml-dev \
-  && pip3 install -U pip setuptools \
+  && pip3 install -U pip setuptools --no-cache-dir \
   && pip3 install poetry virtualenv \
   && rm -rf /var/cache/apk/*
 
